@@ -31,8 +31,22 @@ def custom_topology():
     info('*** Starting network\n')
     net.start()
 
+    # Get IP addresses
+    h1_ip = h1.IP()
+    h2_ip = h2.IP()
+    h3_ip = h3.IP()
+    h4_ip = h4.IP()
+    h5_ip = h5.IP()
+
+    # Print IP addresses
+    info(f'*** Host h1 IP: {h1_ip}\n')
+    info(f'*** Host h2 IP: {h2_ip}\n')
+    info(f'*** Host h3 IP: {h3_ip}\n')
+    info(f'*** Host h4 IP: {h4_ip}\n')
+    info(f'*** Host h5 IP: {h5_ip}\n')
+
     info('*** Starting tcpdump on host h1\n')
-    h1.cmd('tcpdump -i h1-eth0 -w /tmp/h1-eth0.pcap &')
+    h1.cmd('tcpdump -i h1-eth0 -w /mnt/pcap/h1-eth0.pcap &')
 
     info('*** Running CLI\n')
     CLI(net)
