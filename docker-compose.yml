@@ -3,7 +3,11 @@ services:
     build: .
     container_name: mininet
     tty: true
-    command: tail -f /dev/null # Keep the container running for CLI access
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+    command: bash -c "service openvswitch-switch start && /usr/share/openvswitch/scripts/ovs-ctl start && tail -f /dev/null"
     networks:
       - net
     volumes:

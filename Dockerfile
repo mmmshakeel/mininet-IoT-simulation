@@ -24,7 +24,8 @@ RUN apt-get update && apt-get install -y \
     iputils-ping \
     iproute2 \
     hping3 \
-    slowhttptest
+    slowhttptest \
+    openvswitch-switch
 
 ENV TZ=America/New_York
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -39,6 +40,9 @@ RUN pip3 install pandas scapy
 
 # Set the PYTHONPATH environment variable
 ENV PYTHONPATH="/usr/local/lib/python3.8/dist-packages"
+
+# Start Open vSwitch
+RUN service openvswitch-switch start
 
 # Copy the Mininet topology script
 COPY topology.py /topology.py
