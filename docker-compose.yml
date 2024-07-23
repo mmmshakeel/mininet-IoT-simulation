@@ -1,0 +1,38 @@
+services:
+  mininet:
+    build: .
+    container_name: mininet
+    tty: true
+    command: tail -f /dev/null # Keep the container running for CLI access
+    networks:
+      - net
+    volumes:
+      - ./topology.py:/topology.py
+
+  attacker:
+    image: ubuntu:20.04
+    container_name: attacker
+    tty: true
+    networks:
+      - net
+    command: tail -f /dev/null # Keep the container running for CLI access
+    depends_on:
+      - mininet
+    volumes:
+      - ./ddos_attack.sh:/ddos_attack.sh
+
+  processor:
+    build: ./docker/processor
+    container_name: processor
+    tty: true
+    networks:
+      - net
+    depends_on:
+      - mininet
+    volumes:
+      - ./process_pcap.py:/process_pcap.py
+    command: /usr/bin/python3 /process_pcap.py
+
+networks:
+  net:
+    driver: bridge
