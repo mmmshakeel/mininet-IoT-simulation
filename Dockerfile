@@ -1,4 +1,3 @@
-# Use Ubuntu as the base image
 FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -41,17 +40,8 @@ RUN pip3 install pandas scapy
 # Set the PYTHONPATH environment variable
 ENV PYTHONPATH="/usr/local/lib/python3.8/dist-packages"
 
-# Start Open vSwitch services
-RUN /usr/share/openvswitch/scripts/ovs-ctl start --system-id=random
-RUN sleep 20
-RUN service openvswitch-switch start
-    
-
 # Copy the Mininet topology script
 COPY topology.py /topology.py
 
 # Copy the processing script
 COPY process_pcap.py /process_pcap.py
-
-# Set the entrypoint to run Mininet
-ENTRYPOINT ["python3", "/topology.py"]

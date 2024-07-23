@@ -7,7 +7,7 @@ services:
     cap_add:
       - NET_ADMIN
       - SYS_ADMIN
-    command: bash -c "/usr/share/openvswitch/scripts/ovs-ctl start --system-id=random && sleep 20 && service openvswitch-switch start && tail -f /dev/null"
+    command: bash -c "service openvswitch-switch start sleep 20 && /usr/share/openvswitch/scripts/ovs-ctl start --system-id=random && sleep 10 && python3 /topology.py && tail -f /dev/null"
     networks:
       - net
     volumes:
@@ -16,7 +16,7 @@ services:
       - ./shared_volume:/mnt/pcap
 
   attacker:
-    image: ubuntu:20.04
+    build: ./docker/attacker
     container_name: attacker
     tty: true
     networks:
