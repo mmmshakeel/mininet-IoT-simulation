@@ -42,8 +42,10 @@ RUN pip3 install pandas scapy
 ENV PYTHONPATH="/usr/local/lib/python3.8/dist-packages"
 
 # Start Open vSwitch services
-RUN service openvswitch-switch start && \
-    /usr/share/openvswitch/scripts/ovs-ctl start
+RUN /usr/share/openvswitch/scripts/ovs-ctl start --system-id=random
+RUN sleep 20
+RUN service openvswitch-switch start
+    
 
 # Copy the Mininet topology script
 COPY topology.py /topology.py
