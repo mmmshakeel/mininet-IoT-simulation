@@ -8,6 +8,8 @@ services:
       - net
     volumes:
       - ./topology.py:/topology.py
+      - pcap:/mnt/pcap # A share volume, access output from other services
+      - ./shared_volume:/mnt/pcap
 
   attacker:
     image: ubuntu:20.04
@@ -30,9 +32,14 @@ services:
     depends_on:
       - mininet
     volumes:
-      - ./process_pcap.py:/process_pcap.py
-    command: /usr/bin/python3 /process_pcap.py
+      - ./process_pcap.py:/app/process_pcap.py
+      - pcap:/mnt/pcap
+      - ./shared_volume:/mnt/pcap
+    command: python /app/process_pcap.py
 
 networks:
   net:
     driver: bridge
+
+volumes:
+  pcap:
