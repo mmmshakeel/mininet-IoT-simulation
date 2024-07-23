@@ -3,7 +3,7 @@ from mininet.node import Controller
 from mininet.cli import CLI
 from mininet.log import setLogLevel, info
 from mininet.link import TCLink
-import os
+import time
 
 def custom_topology():
     net = Mininet(controller=Controller, link=TCLink)
@@ -20,6 +20,8 @@ def custom_topology():
 
     info('*** Adding switch\n')
     s1 = net.addSwitch('s1')
+
+    time.sleep(10)
 
     info('*** Creating links\n')
     net.addLink(h1, s1)
