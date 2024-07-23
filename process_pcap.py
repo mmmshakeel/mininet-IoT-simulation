@@ -2,6 +2,7 @@ import pandas as pd
 from scapy.all import rdpcap
 from scapy.layers.inet import IP, TCP, UDP
 import numpy as np
+import os
 
 def extract_features(pcap_file):
     packets = rdpcap(pcap_file)
@@ -43,7 +44,22 @@ def extract_features(pcap_file):
     df = pd.DataFrame(data)
     return df
 
+def main():
+    pcap_file = '/mnt/pcap/h1-eth0.pcap'
+    output_csv = '/mnt/pcap/processed_traffic.csv'
+    
+    while True:
+        if os.path.exists(pcap_file):
+            try:
+                df = extract_features(pcap_file)
+                df.to_csv(output_csv, index=False)
+                print(f'Processed {pcap_file} and updated {output_csv}')
+            except Exception as e:
+                print(f'Error processing {pcap_file}: {e}')
+        else:
+            print(f'{pcap_file} not found. Waiting...')
+        
+        time.sleep(3)
+
 if __name__ == '__main__':
-    pcap_file = '/tmp/h1-eth0.pcap'
-    df = extract_features(pcap_file)
-    df.to_csv('/tmp/processed_traffic.csv', index=False)
+    main()
