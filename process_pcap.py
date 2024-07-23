@@ -2,6 +2,7 @@ import pandas as pd
 from scapy.all import rdpcap
 from scapy.layers.inet import IP, TCP, UDP
 import numpy as np
+import time
 import os
 
 def extract_features(pcap_file):
@@ -59,7 +60,7 @@ def main():
         else:
             print(f'{pcap_file} not found. Waiting...')
         
-        time.sleep(3)
+        time.sleep(10)
 
 if __name__ == '__main__':
     main()
