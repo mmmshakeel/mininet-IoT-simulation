@@ -11,9 +11,10 @@ services:
     networks:
       - net
     volumes:
+      - pcap:/mnt/pcap # A shared volume, access output from other services
       - ./topology.py:/topology.py
-      - pcap:/mnt/pcap # A share volume, access output from other services
       - ./shared_volume:/mnt/pcap
+      - ./ddos_attack.sh:/mnt/pcap/ddos_attack.sh
 
   attacker:
     build: ./docker/attacker
@@ -36,8 +37,8 @@ services:
     depends_on:
       - mininet
     volumes:
-      - ./process_pcap.py:/app/process_pcap.py
       - pcap:/mnt/pcap
+      - ./process_pcap.py:/app/process_pcap.py
       - ./shared_volume:/mnt/pcap
     command: python /app/process_pcap.py
 

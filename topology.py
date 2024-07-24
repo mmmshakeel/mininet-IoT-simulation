@@ -50,8 +50,11 @@ def custom_topology():
     info('*** Starting tcpdump on host h1\n')
     h1.cmd('tcpdump -i h1-eth0 -w /mnt/pcap/h1-eth0.pcap &')
 
-    info('*** Running CLI\n')
-    CLI(net)
+    info('*** Triggering DDoS attack\n')
+    h2.cmd(f'bash /mnt/pcap/ddos_attack.sh {h1_ip} &')
+
+    info('*** Network running for 300 seconds\n')
+    time.sleep(300)
 
     info('*** Stopping network\n')
     net.stop()
