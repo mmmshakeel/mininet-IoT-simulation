@@ -40,7 +40,7 @@ services:
       - pcap:/mnt/pcap
       - ./process_pcap.py:/app/process_pcap.py
       - ./shared_volume:/mnt/pcap
-    command: python /app/process_pcap.py
+    command: tail -f /dev/null # Keep the container running for CLI access
 
 networks:
   net:
