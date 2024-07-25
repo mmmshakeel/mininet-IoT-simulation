@@ -10,35 +10,34 @@ def extract_features(pcap_file):
     data = []
 
     for packet in packets:
-        if packet.haslayer(IP):
-            try:
-                ts = packet.time
-                ip_layer = packet[IP]
-                src = ip_layer.src
-                dst = ip_layer.dst
-                protocol = ip_layer.proto
-                header_length = ip_layer.ihl * 4
-                size = len(ip_layer)
+        try:
+            ts = packet.time
+            ip_layer = packet[IP]
+            src = ip_layer.src
+            dst = ip_layer.dst
+            protocol = ip_layer.proto
+            header_length = ip_layer.ihl * 4
+            size = len(ip_layer)
 
-                flags = 0
-                if protocol == 6:  # TCP
-                    tcp = packet[TCP]
-                    flags = tcp.flags
-                elif protocol == 17:  # UDP
-                    udp = packet[UDP]
+            flags = 0
+            if protocol == 6:  # TCP
+                tcp = packet[TCP]
+                flags = tcp.flags
+            elif protocol == 17:  # UDP
+                udp = packet[UDP]
 
-                row = {
-                    'Timestamp': ts,
-                    'Source IP': src,
-                    'Destination IP': dst,
-                    'Protocol': protocol,
-                    'Header Length': header_length,
-                    'Size': size,
-                    'Flags': flags,
-                }
-                data.append(row)
-            except Exception as e:
-                print(f"Error processing packet: {e}")
+            row = {
+                'Timestamp': ts,
+                'Source IP': src,
+                'Destination IP': dst,
+                'Protocol': protocol,
+                'Header Length': header_length,
+                'Size': size,
+                'Flags': flags,
+            }
+            data.append(row)
+        except Exception as e:
+            print(f"Error processing packet: {e}")
 
     df = pd.DataFrame(data)
     return df
