@@ -11,55 +11,73 @@ def extract_features(pcap_file):
 
     for packet in packets:
         if packet.haslayer(IP):
-            row = {
-                'flow_duration': packet.time,
-                'Header_Length': len(packet[IP]),
-                'Protocol Type': packet[IP].proto,
-                'Duration': packet.time,  # Simplified
-                'Rate': len(packet) / packet.time if packet.time > 0 else 0,
-                'Srate': len(packet) / packet.time if packet.time > 0 else 0,
-                'Drate': 0,  # To be calculated
-                'fin_flag_number': packet[TCP].flags.F if packet.haslayer(TCP) else 0,
-                'syn_flag_number': packet[TCP].flags.S if packet.haslayer(TCP) else 0,
-                'rst_flag_number': packet[TCP].flags.R if packet.haslayer(TCP) else 0,
-                'psh_flag_number': packet[TCP].flags.P if packet.haslayer(TCP) else 0,
-                'ack_flag_number': packet[TCP].flags.A if packet.haslayer(TCP) else 0,
-                'ece_flag_number': packet[TCP].flags.E if packet.haslayer(TCP) else 0,
-                'cwr_flag_number': packet[TCP].flags.C if packet.haslayer(TCP) else 0,
-                'Urg_flag_number': packet[TCP].flags.U if packet.haslayer(TCP) else 0,
-                'Average Packet Size': len(packet) / packet.time if packet.time > 0 else 0,
-                'Min Packet Length': len(packet),
-                'Max Packet Length': len(packet),
-                'Tot size': len(packet),
-                'IAT': packet.time,  # Simplified
-                'Number': 1,  # Count of packets
-                'Magnitue': np.sqrt(len(packet)),  # Simplified
-                'Radius': 0,  # Simplified
-                'Covariance': 0,  # Simplified
-                'Variance': np.var([len(packet)]),  # Simplified
-                'Weight': len(packet),  # Simplified
-                'label': 'Normal'  # Default label, to be updated based on attack
-            }
-            data.append(row)
+            try:
+                ts = packet.time
+                ip_layer = packet[IP]
+                src = ip_layer.src
+                dst = ip_layer.dst
+                protocol = ip_layer.proto
+                header_length = ip_layer.ihl * 4
+                size = len(ip_layer)
+
+                flags = 0
+                if protocol == 6:  # TCP
+                    tcp = packet[TCP]
+                    flags = tcp.flags
+                elif protocol == 17:  # UDP
+                    udp = packet[UDP]
+
+                row = {
+                    'Timestamp': ts,
+                    'Source IP': src,
+                    'Destination IP': dst,
+                    'Protocol': protocol,
+                    'Header Length': header_length,
+                    'Size': size,
+                    'Flags': flags,
+                }
+                data.append(row)
+            except Exception as e:
+                print(f"Error processing packet: {e}")
 
     df = pd.DataFrame(data)
+    return df
+
+def calculate_derived_features(df):
+    df['flow_duration'] = df['Timestamp'].diff().fillna(0)
+    df['Rate'] = df['Size'] / df['flow_duration']
+    df['Srate'] = df.groupby('Source IP')['Size'].transform(lambda x: x / df['flow_duration'])
+    df['Drate'] = df.groupby('Destination IP')['Size'].transform(lambda x: x / df['flow_duration'])
+    df['Flags'] = df['Flags'].astype(str)
+    df['IAT'] = df['Timestamp'].diff().fillna(0)
+    df['Number'] = df.groupby(['Source IP', 'Destination IP']).cumcount() + 1
+    df['Magnitude'] = df['Size'] * df['Rate']
+    df['Radius'] = (df['Size'] ** 2 + df['Rate'] ** 2) ** 0.5
+    df['Covariance'] = df['Size'].rolling(window=2).cov()
+    df['Variance'] = df['Size'].rolling(window=2).var()
+    df['Weight'] = df['Size'] * df['Number']
+
     return df
 
 def main():
     pcap_file = '/mnt/pcap/h1-eth0.pcap'
     output_csv = '/mnt/pcap/processed_traffic.csv'
-    
+
     while True:
         if os.path.exists(pcap_file):
             try:
                 df = extract_features(pcap_file)
-                df.to_csv(output_csv, index=False)
-                print(f'Processed {pcap_file} and updated {output_csv}')
+                if not df.empty:
+                    df = calculate_derived_features(df)
+                    df.to_csv(output_csv, index=False)
+                    print(f'Processed {pcap_file} and updated {output_csv}')
+                else:
+                    print(f'No valid data extracted from {pcap_file}')
             except Exception as e:
                 print(f'Error processing {pcap_file}: {e}')
         else:
             print(f'{pcap_file} not found. Waiting...')
-        
+
         time.sleep(10)
 
 if __name__ == '__main__':
