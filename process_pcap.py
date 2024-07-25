@@ -10,7 +10,7 @@ def extract_features(pcap_file):
     data = []
 
     for packet in packets:
-        try:
+        if packet.haslayer(IP):  # Check if the packet has an IP layer
             ts = packet.time
             ip_layer = packet[IP]
             src = ip_layer.src
@@ -20,11 +20,9 @@ def extract_features(pcap_file):
             size = len(ip_layer)
 
             flags = 0
-            if protocol == 6:  # TCP
-                tcp = packet[TCP]
-                flags = tcp.flags
-            elif protocol == 17:  # UDP
-                udp = packet[UDP]
+            if packet.haslayer(TCP):  # Check if the packet has a TCP layer
+                tcp_layer = packet[TCP]
+                flags = tcp_layer.flags
 
             row = {
                 'Timestamp': ts,
@@ -36,8 +34,37 @@ def extract_features(pcap_file):
                 'Flags': flags,
             }
             data.append(row)
-        except Exception as e:
-            print(f"Error processing packet: {e}")
+        elif packet.haslayer(TCP):  # Check if the packet has a TCP layer but no IP layer
+            ts = packet.time
+            tcp_layer = packet[TCP]
+            flags = tcp_layer.flags
+            src = dst = protocol = header_length = size = None  # Set default values for non-IP packets
+
+            row = {
+                'Timestamp': ts,
+                'Source IP': src,
+                'Destination IP': dst,
+                'Protocol': protocol,
+                'Header Length': header_length,
+                'Size': size,
+                'Flags': flags,
+            }
+            data.append(row)
+        elif packet.haslayer(UDP):  # Check if the packet has a UDP layer but no IP layer
+            ts = packet.time
+            udp_layer = packet[UDP]
+            src = dst = protocol = header_length = size = flags = None  # Set default values for non-IP packets
+
+            row = {
+                'Timestamp': ts,
+                'Source IP': src,
+                'Destination IP': dst,
+                'Protocol': protocol,
+                'Header Length': header_length,
+                'Size': size,
+                'Flags': flags,
+            }
+            data.append(row)
 
     df = pd.DataFrame(data)
     return df
