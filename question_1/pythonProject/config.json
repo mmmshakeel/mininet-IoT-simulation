@@ -1,0 +1,10 @@
+{
+    "airports_dataset_url": "https://sacodeassessment.blob.core.windows.net/public/airports.csv",
+    "airports_dataset_file_path": "datasets/airports.csv",
+    "countries_dataset_url": "https://sacodeassessment.blob.core.windows.net/public/countries.csv",
+    "countries_dataset_file_path": "datasets/countries.csv",
+    "runways_dataset_url": "https://sacodeassessment.blob.core.windows.net/public/runways.csv",
+    "runways_dataset_file_path": "datasets/runways.csv",
+
+    "log_level": "INFO"
+}
